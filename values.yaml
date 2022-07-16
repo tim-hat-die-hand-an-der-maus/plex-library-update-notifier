@@ -37,7 +37,7 @@ cronjobs:
   - name: *basename
     image: ghcr.io/tim-hat-die-hand-an-der-maus/plex-library-update-notifier:__TAG__
     imagePullPolicy: Always
-    schedule: "CRON_TZ=UTC * */1 * * *"
+    schedule: "CRON_TZ=UTC 0 * * * *"
     backoffLimit: 0
     successfulJobsHistoryLimit: 1
     failedJobsHistoryLimit: 1
