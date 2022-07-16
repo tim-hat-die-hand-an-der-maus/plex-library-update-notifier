@@ -123,7 +123,7 @@ def send_update(new_titles: Dict[str, List[str]], token: str, chatlist: List[str
 
     message = ""
     for server_name, titles in new_titles.items():
-        message += f"--- {server_name}"
+        message += f"{server_name}"
         for title in titles:
             message += f"\n    {title}"
 
