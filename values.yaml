@@ -15,7 +15,7 @@ role:
 rolebinding:
   name: *basename
 
-configmaps:
+configmaps: &configmaps
   - name: *basename
     data:
       API_URL: "http://plex-resolver"
@@ -27,7 +27,7 @@ configmaps:
     data:
       LAST_SEEN: "0"
 
-secrets:
+secrets: &secrets
   - name: *basename
     data:
       BOT_TOKEN: __BOT_TOKEN__
@@ -42,11 +42,8 @@ cronjobs:
     failedJobsHistoryLimit: 1
     restartPolicy: Never
     envFrom:
-      configmaps:
-        - *basename
-        - plex-library-update-notifier-last-seen
-      secrets:
-        - *basename
+      configmaps: *configmaps
+      secrets: *secrets
     labels:
       app: *basename
     requests:
