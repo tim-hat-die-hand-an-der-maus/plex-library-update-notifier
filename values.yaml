@@ -24,9 +24,6 @@ configmaps: &configmaps
       LAST_SEEN_CONFIGMAP_NAME: "plex-library-update-notifier-last-seen"
       LAST_SEEN_KEY_NAME: "LAST_SEEN"
       NAMESPACE: *namespace
-  - name: plex-library-update-notifier-last-seen
-    data:
-      LAST_SEEN: "0"
 
 secrets: &secrets
   - name: *basename

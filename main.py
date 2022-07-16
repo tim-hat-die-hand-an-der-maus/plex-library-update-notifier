@@ -10,6 +10,7 @@ from typing import List, Dict, Optional
 import requests
 from dataclasses_json import dataclass_json, LetterCase
 from kubernetes import config, client
+from kubernetes.client import ApiException, V1ConfigMap, V1ObjectMeta
 from kubernetes.config import ConfigException
 # noinspection PyPackageRequirements
 # false positive
@@ -67,13 +68,26 @@ def get_kubernetes_api():
     return client.CoreV1Api()
 
 
-def get_configmap(api, namespace: str, configmap_name: str):
-    return api.read_namespaced_config_map(configmap_name, namespace)
+def get_or_create_configmap(api, namespace: str, configmap_name: str, key_name: str, tries: int = 0):
+    try:
+        return api.read_namespaced_config_map(configmap_name, namespace)
+    except ApiException:
+        api.create_namespaced_config_map(namespace, body=V1ConfigMap(
+            metadata=V1ObjectMeta(
+                name=configmap_name,
+            ),
+            data={key_name: "0"}
+        ))
+
+        if tries < 5:
+            return get_or_create_configmap(api, namespace, configmap_name, key_name, tries + 1)
+        else:
+            raise e
 
 
 def read_last_timestamp(namespace: str, configmap_name: str, key_name: str) -> Optional[int]:
     api = get_kubernetes_api()
-    configmap = get_configmap(api, namespace, configmap_name)
+    configmap = get_or_create_configmap(api, namespace, configmap_name, key_name)
     if key_name in configmap.data:
         return int(configmap.data[key_name])
 
