@@ -115,7 +115,7 @@ def get_new_titles_from_responses(responses: List[MovieResponse]) -> Dict[str, L
 def send_update(new_titles: Dict[str, List[str]], token: str, chatlist: List[str]):
     logger = create_logger(inspect.currentframe().f_code.co_name)
     if not token:
-        logger.error("TOKEN not defined in environment, skip sending telegram message")
+        logger.error("`BOT_TOKEN` not defined in environment, skip sending telegram message")
         return
 
     if not chatlist:
