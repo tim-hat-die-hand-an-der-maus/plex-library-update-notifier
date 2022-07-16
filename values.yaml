@@ -3,6 +3,9 @@ namespace:
 
 base_name: &basename plex-library-update-notifier
 
+rbac:
+  create: false
+
 serviceaccount:
   name: *basename
 
