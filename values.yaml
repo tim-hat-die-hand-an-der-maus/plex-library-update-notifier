@@ -19,6 +19,7 @@ configmaps: &configmaps
   - name: *basename
     data:
       API_URL: "http://plex-resolver"
+      CHATLIST: "__CHATLIST__"
       BOT_TOKEN: __BOT_TOKEN__
       LAST_SEEN_CONFIGMAP_NAME: "plex-library-update-notifier-last-seen"
       LAST_SEEN_KEY_NAME: "LAST_SEEN"
