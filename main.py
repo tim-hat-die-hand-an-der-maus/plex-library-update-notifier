@@ -165,3 +165,4 @@ if __name__ == "__main__":
         main(token, chatlist)
     except Exception as e:
         send_update({"error": ["plex-library-update-notifier", "failed to complete", str(e)]}, token, chatlist)
+        sys.exit(1)
