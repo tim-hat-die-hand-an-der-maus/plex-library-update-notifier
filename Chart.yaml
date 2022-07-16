@@ -1,0 +1,6 @@
+apiVersion: v2
+name: __TODO__
+description: __TODO__
+type: application
+version: 0.1.0
+appVersion: "1.16.0"

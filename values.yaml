@@ -1,0 +1,78 @@
+namespace:
+  name: __NAMESPACE_NAME__
+
+deployments:
+  - name: __DEPLOYMENT_NAME__
+    imagePullPolicy: Always
+    revisionHistoryLimit: 1
+    replicas: 2
+    labels:
+      app: __DEPLOYMENT_LABEL_APP_VALUE__
+    containers:
+      - image: ghcr.io/__IMAGE_REPOSITORY__/__IMAGE_NAME__:__TAG__
+        ports:
+        - 8080
+        requests:
+          cpu: 50m
+          memory: 20Mi
+
+services:
+  - name: __SERVICE_NAME__
+    port: 8080
+    targetPort: 8080
+    selector: __SERVICE_APP_SELECTOR__
+
+ingresses:
+  - name: __INGRESS_NAME__
+    hosts:
+      - name: __INGRESS_HOST__
+    secret: __INGRESS_SECRET_NAME__
+    issuer: letsencrypt-issuer
+
+configmaps:
+  - name: todo
+    data:
+      API_URL: __API_URL__
+
+secrets:
+  - name: todo
+    data:
+      BOT_TOKEN: BOT_TOKEN
+
+cronjobs:
+  - name: __CRONJOB_NAME__
+    image: ghcr.io/__IMAGE_REPOSITORY__/__IMAGE_NAME__:__TAG__
+    imagePullPolicy: Always
+    command: [ '"/app/binary"' ]
+    args: [ '"hello"' ]
+    schedule: "CRON_TZ=UTC 0 19 * * 5"
+    backoffLimit: 0
+    successfulJobsHistoryLimit: 1
+    failedJobsHistoryLimit: 1
+    restartPolicy: Never
+    labels:
+      app: __CRONJOB_LABELS_1__
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limit:
+      cpu: 300m
+      memory: 300Mi
+  - name: __CRONJOB_NAME_2__
+    image: ghcr.io/__IMAGE_REPOSITORY__/__IMAGE_NAME__:__TAG__
+    imagePullPolicy: Always
+    command: [ '"/app/binary"' ]
+    args: [ '"world"' ]
+    schedule: "CRON_TZ=UTC 0 16 * * 0"
+    backoffLimit: 0
+    successfulJobsHistoryLimit: 1
+    failedJobsHistoryLimit: 1
+    restartPolicy: Never
+    labels:
+      app: __CRONJOB_LABELS_2__
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limit:
+      cpu: 300m
+      memory: 300Mi

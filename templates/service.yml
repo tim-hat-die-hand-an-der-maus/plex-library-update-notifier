@@ -1,0 +1,16 @@
+{{- range .Values.services }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}
+  namespace: {{ default $.Release.Namespace (default $.Values.namespace.name .namespace) }}
+spec:
+  selector:
+    {{ default "app" .selectorKey }}: {{ .selector }}
+  ports:
+    - name: {{ default "http" .name }}
+      protocol: {{ default "TCP" .protocol }}
+      port: {{ default .targetPort .port }}
+      targetPort: {{ default .port .targetPort }}
+{{- end }}

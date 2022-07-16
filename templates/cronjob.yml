@@ -1,0 +1,53 @@
+{{- range $cronjob := .Values.cronjobs }}
+{{- with $cronjob }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
+spec:
+  schedule: "{{ .schedule }}"
+  successfulJobsHistoryLimit: {{ .successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .failedJobsHistoryLimit }}
+  jobTemplate:
+    metadata:
+      labels:
+        {{- range $k, $v := .labels }}
+        {{ $k }}: {{ $v }}
+        {{- end }}
+    spec:
+      backoffLimit: {{ .backoffLimit }}
+      template:
+        spec:
+          restartPolicy: {{ .restartPolicy }}
+          containers:
+          - name: {{ .name }}
+            image: {{ .image }}
+            imagePullPolicy: {{ .imagePullPolicy }}
+            {{- if .command }}
+            command: {{ .command }}
+            {{- end }}
+            {{- if .args }}
+            args: {{ .args }}
+            {{- end }}
+            {{- if .envFrom }}
+            envFrom:
+              {{- range .envFrom.configmaps }}
+              - configMapRef:
+                  name: {{ .name }}
+              {{- end }}
+              {{- range .envFrom.secrets }}
+              - secretRef:
+                  name: {{ .name }}
+              {{- end }}
+            {{- end }}
+            resources:
+              requests:
+                cpu: {{ .requests.cpu }}
+                memory: {{ .requests.memory }}
+              limits:
+                cpu: {{ .limit.cpu }}
+                memory: {{ .limit.memory }}
+{{- end }}
+{{- end }}

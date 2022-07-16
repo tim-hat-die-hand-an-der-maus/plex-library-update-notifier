@@ -1,0 +1,46 @@
+{{- range $deployment := .Values.deployments }}
+{{- with $deployment }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .name }}
+  namespace: {{ default $.Release.Namespace (default $.Values.namespace.name .namespace) }}
+spec:
+  revisionHistoryLimit: {{ .revisionHistoryLimit }}
+  replicas: {{ .replicas }}
+  selector:
+    matchLabels:
+      {{- range $k, $v := (default .labels .selectorLabels) }}
+      {{ $k }}: {{ $v }}
+      {{- end }}
+  template:
+    metadata:
+      labels:
+        {{- range $k, $v := (default .labels .metadataLabels) }}
+        {{ $k }}: {{ $v }}
+        {{- end }}
+    spec:
+      containers:
+      {{- range .containers }}
+      - name: {{ default $deployment.name .name }}
+        image: {{ .image }}
+        imagePullPolicy: {{ .imagePullPolicy }}
+        {{- if .command }}
+        command: {{ .command }}
+        {{- end }}
+        {{- if .args }}
+        args: {{ .args }}
+        {{- end }}
+        ports:
+        {{- range $port := .ports }}
+        - containerPort: {{ $port }}
+          protocol: TCP
+        {{- end }}
+        resources:
+          requests:
+            cpu: {{ .requests.cpu }}
+            memory: {{ .requests.memory }}
+      {{- end }}
+{{- end }}
+{{- end }}

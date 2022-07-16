@@ -1,0 +1,23 @@
+name: Build image
+
+on: pull_request
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: sed -i -e "s#__TAG__#${GITHUB_SHA}#g" values.yaml
+      - uses: WyriHaximus/github-action-helm3@v2
+        with:
+          exec: helm lint
+      - uses: WyriHaximus/github-action-helm3@v2
+        with:
+          exec: helm lint --strict
+
+  build_push_docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build the tagged Docker image
+        run: docker build -t ghcr.io/__IMAGE_REPO_NAME__/__IMAGE_NAME__:${GITHUB_SHA} .
