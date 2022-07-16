@@ -41,6 +41,12 @@ cronjobs:
     successfulJobsHistoryLimit: 1
     failedJobsHistoryLimit: 1
     restartPolicy: Never
+    envFrom:
+      configmaps:
+        - *basename
+        - plex-library-update-notifier-last-seen
+      secrets:
+        - *basename
     labels:
       app: *basename
     requests:
