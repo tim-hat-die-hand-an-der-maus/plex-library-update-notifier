@@ -5,7 +5,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: {{ .name }}
-  namespace: {{ $.Values.namespace }}
+  namespace: {{ $.Values.namespace.name }}
 spec:
   schedule: "{{ .schedule }}"
   successfulJobsHistoryLimit: {{ .successfulJobsHistoryLimit }}
@@ -20,6 +20,7 @@ spec:
       backoffLimit: {{ .backoffLimit }}
       template:
         spec:
+          serviceAccountName: {{ $.Values.serviceaccount.name }}
           restartPolicy: {{ .restartPolicy }}
           containers:
           - name: {{ .name }}

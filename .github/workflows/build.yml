@@ -20,4 +20,4 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build the tagged Docker image
-        run: docker build -t ghcr.io/__IMAGE_REPO_NAME__/__IMAGE_NAME__:${GITHUB_SHA} .
+        run: docker build -t ghcr.io/tim-hat-die-hand-an-der-maus/plex-library-update-notifier:${GITHUB_SHA} .

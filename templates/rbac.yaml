@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.serviceaccount.name }}
+  namespace: {{ .Values.namespace.name }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Values.role.name }}
+  namespace: {{ .Values.namespace.name }}
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames:
+      {{- range $configmap := .Values.configmaps }}
+      - "{{ $configmap.name }}"
+      {{- end }}
+    verbs:
+      - get
+      - edit
+      - update
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Values.rolebinding.name }}
+  namespace: {{ .Values.namespace.name }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io/v1
+  kind: Role
+  name: {{ .Values.role.name }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.serviceaccount.name }}
+    namespace: {{ .Values.namespace.name }}

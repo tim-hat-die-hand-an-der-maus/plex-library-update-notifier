@@ -9,3 +9,4 @@
 *.tmproj
 .vscode/
 *.iml
+venv/
