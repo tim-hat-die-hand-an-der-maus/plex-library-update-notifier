@@ -50,6 +50,9 @@ class Movie:
     year: int
     added_at: str
 
+    def __str__(self):
+        return f"{self.title} ({self.year})"
+
 
 @dataclass_json
 @dataclass
@@ -117,16 +120,16 @@ def get_plex_content_since(since: int) -> List[MovieResponse]:
     return [MovieResponse.from_json(json.dumps(js)) for js in response.json()["data"]]
 
 
-def get_new_titles_from_responses(responses: List[MovieResponse]) -> Dict[str, List[str]]:
-    titles = dict()
+def get_new_movies_from_responses(responses: List[MovieResponse]) -> Dict[str, List[Movie]]:
+    movies = dict()
     for server in responses:
-        titles[server.name] = [movie.title for movie in server.movies]
+        movies[server.name] = server.movies
 
-    return titles
+    return movies
 
 
 # noinspection PyShadowingNames
-def send_update(new_titles: Dict[str, List[str]], token: str, chatlist: List[str]):
+def send_update(new_movies: Dict[str, List[Movie]], token: str, chatlist: List[str]):
     logger = create_logger(inspect.currentframe().f_code.co_name)
     if not token:
         logger.error("`BOT_TOKEN` not defined in environment, skip sending telegram message")
@@ -136,10 +139,10 @@ def send_update(new_titles: Dict[str, List[str]], token: str, chatlist: List[str
         logger.error("chatlist is empty (env var: TELEGRAM_CHATLIST)")
 
     message = ""
-    for server_name, titles in new_titles.items():
+    for server_name, movies in new_movies.items():
         message += f"{server_name}"
-        for title in titles:
-            message += f"\n    {title}"
+        for movie in movies:
+            message += f"\n    {str(movie)}"
 
     for user in chatlist:
         Bot(token=token).send_message(chat_id=user, text=message)
@@ -160,10 +163,10 @@ def main(token: str, chatlist: List[str]):
 
     responses = get_plex_content_since(timestamp)
     timestamp: float = datetime.datetime.now().timestamp()
-    new_titles = get_new_titles_from_responses(responses)
+    new_movies = get_new_movies_from_responses(responses)
 
-    if new_titles:
-        send_update(new_titles, token, chatlist)
+    if new_movies:
+        send_update(new_movies, token, chatlist)
         update_last_timestamp(namespace, configmap_name, configmap_key_name, int(timestamp))
     else:
         print("no new titles")
@@ -174,13 +177,15 @@ if __name__ == "__main__":
     try:
         token = os.getenv("BOT_TOKEN")
         chatlist = os.getenv("CHATLIST")
-        error_chat_id = os.getenv("ERROR_CHAT_ID")
+        error_chat_id = os.getenv("ERROR_CHAT_ID") or chatlist
 
         if not token or not chatlist:
             raise LookupError("both `BOT_TOKEN` and `CHATLIST` must be set")
         chatlist = chatlist.split(",")
         main(token, chatlist)
     except Exception as e:
+        # noinspection PyTypeChecker
+        # this is a correct type check failure but... it's fine
         send_update({"error": ["plex-library-update-notifier", "failed to complete", str(e)]}, token, [error_chat_id])
         logger.exception("caught Exception", exc_info=True)
         sys.exit(1)
