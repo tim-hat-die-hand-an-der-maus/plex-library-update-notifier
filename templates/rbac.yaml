@@ -14,12 +14,12 @@ rules:
   - apiGroups: [""]
     resources: ["configmaps"]
     resourceNames:
+      - plex-library-update-notifier-last-seen
       {{- range $configmap := .Values.configmaps }}
       - "{{ $configmap.name }}"
       {{- end }}
     verbs:
       - get
-      - edit
       - update
       - patch
       - create
