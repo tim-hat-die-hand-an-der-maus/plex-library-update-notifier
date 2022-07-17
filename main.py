@@ -128,6 +128,26 @@ def get_new_movies_from_responses(responses: List[MovieResponse]) -> Dict[str, L
     return movies
 
 
+def _split_messages(lines):
+    message_length = 4096
+    messages = []
+    current_length = 0
+    current_message = 0
+    for line in lines:
+        if len(messages) <= current_message:
+            messages.append([])
+
+        line_length = len(line)
+        if current_length + line_length < message_length:
+            current_length += line_length
+            messages[current_message].append(line)
+        else:
+            current_length = 0
+            current_message += 1
+
+    return messages
+
+
 # noinspection PyShadowingNames
 def send_update(new_movies: Dict[str, List[Movie]], token: str, chatlist: List[str]):
     logger = create_logger(inspect.currentframe().f_code.co_name)
@@ -138,14 +158,15 @@ def send_update(new_movies: Dict[str, List[Movie]], token: str, chatlist: List[s
     if not chatlist:
         logger.error("chatlist is empty (env var: TELEGRAM_CHATLIST)")
 
-    message = ""
+    messages = []
     for server_name, movies in new_movies.items():
-        message += f"{server_name}"
+        messages.append(server_name)
         for movie in movies:
-            message += f"\n    {str(movie)}"
+            messages.append(f"\n    {str(movie)}")
 
     for user in chatlist:
-        Bot(token=token).send_message(chat_id=user, text=message)
+        for message in _split_messages(messages):
+            Bot(token=token).send_message(chat_id=user, text="".join(message))
 
 
 # noinspection PyShadowingNames
@@ -177,7 +198,7 @@ if __name__ == "__main__":
     try:
         token = os.getenv("BOT_TOKEN")
         chatlist = os.getenv("CHATLIST")
-        error_chat_id = os.getenv("ERROR_CHAT_ID") or chatlist
+        error_chat_id = [os.getenv("ERROR_CHAT_ID")] or chatlist
 
         if not token or not chatlist:
             raise LookupError("both `BOT_TOKEN` and `CHATLIST` must be set")
@@ -186,7 +207,7 @@ if __name__ == "__main__":
     except Exception as e:
         # noinspection PyTypeChecker
         # this is a correct type check failure but... it's fine
-        send_update({"error": ["plex-library-update-notifier", "failed to complete", str(e)]}, token, [error_chat_id])
+        send_update({"error": ["plex-library-update-notifier", "failed to complete", str(e)]}, token, error_chat_id)
         logger.exception("caught Exception", exc_info=True)
         sys.exit(1)
 
