@@ -15,13 +15,13 @@ rules:
     resources: ["configmaps"]
     resourceNames:
       - plex-library-update-notifier-last-seen
-      {{- range $configmap := .Values.configmaps }}
-      - "{{ $configmap.name }}"
-      {{- end }}
     verbs:
       - get
       - update
       - patch
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs:
       - create
 ---
 apiVersion: rbac.authorization.k8s.io/v1
