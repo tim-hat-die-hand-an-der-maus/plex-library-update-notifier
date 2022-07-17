@@ -170,13 +170,19 @@ def main(token: str, chatlist: List[str]):
 
 
 if __name__ == "__main__":
+    logger = create_logger("__main__")
     try:
         token = os.getenv("BOT_TOKEN")
         chatlist = os.getenv("CHATLIST")
+        error_chat_id = os.getenv("ERROR_CHAT_ID")
+
         if not token or not chatlist:
             raise LookupError("both `BOT_TOKEN` and `CHATLIST` must be set")
         chatlist = chatlist.split(",")
         main(token, chatlist)
     except Exception as e:
-        send_update({"error": ["plex-library-update-notifier", "failed to complete", str(e)]}, token, chatlist)
+        send_update({"error": ["plex-library-update-notifier", "failed to complete", str(e)]}, token, [error_chat_id])
+        logger.exception("caught Exception", exc_info=True)
         sys.exit(1)
+
+    logger.debug("success")
