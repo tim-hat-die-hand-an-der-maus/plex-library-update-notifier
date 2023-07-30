@@ -1,4 +1,4 @@
 requests==2.31.0
 python-telegram-bot==13.15
-dataclasses-json==0.5.13
+dataclasses-json==0.5.14
 kubernetes==24.2.0
